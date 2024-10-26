@@ -1,0 +1,22 @@
+{
+  "name": "hw4",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "bootstrap": "^5.3.3",
+    "d3": "^7.9.0",
+    "next": "^15.0.1",
+    "react-bootstrap": "^2.10.5",
+
+
+  }
+}
