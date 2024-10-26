@@ -8,37 +8,33 @@ import Tooltip from './components/tooltips';
 
 const csvUrl = 'https://gist.githubusercontent.com/hogwild/3b9aa737bde61dcb4dfa60cde8046e04/raw/citibike2020.csv';
 
-function useData(csvPath) {
-    const [dataAll, setData] = React.useState(null);
-    React.useEffect(() => {
-        d3.csv(csvPath).then(data => {
-            data.forEach(d => {
-                d.start = +d.start;
-                d.tripdurationS = +d.tripdurationS;
-                d.end = +d.end;
-                d.tripdurationE = +d.tripdurationE;
-            });
-            setData(data);
-        });
-    }, [csvPath]);
-    return dataAll;
+export async function getServerSideProps() {
+    const dataAll = await d3.csv(csvUrl).then(data => 
+        data.map(d => ({
+            ...d,
+            start: +d.start,
+            tripdurationS: +d.tripdurationS,
+            end: +d.end,
+            tripdurationE: +d.tripdurationE,
+        }))
+    );
+    return { props: { dataAll } };
 }
 
-const Charts = () => {
-    const [month, setMonth] = React.useState('4');
+const Charts = ({ dataAll }) => {
+    const [month, setMonth] = useState(4); // April as default
     const [selectedStation, setSelectedStation] = useState(null);
     const [tooltipX, setTooltipX] = useState(0);
     const [tooltipY, setTooltipY] = useState(0);
     const [tooltipContent, setTooltipContent] = useState(null);
 
     const handleStationHover = (d, event) => {
-        console.log(`Hovering over station: ${d.station}`);
         const pageX = event?.pageX ?? 0;
         const pageY = event?.pageY ?? 0;
         setSelectedStation(d.station);
         setTooltipX(pageX);
         setTooltipY(pageY);
-        setTooltipContent(d); // Pass the entire data object to Tooltip
+        setTooltipContent(d);
     };
 
     const clearStationHover = () => {
@@ -46,8 +42,7 @@ const Charts = () => {
         setTooltipContent(null);
     };
 
-    const dataAll = useData(csvUrl);
-    if (!dataAll) {
+    if (!dataAll || !Array.isArray(dataAll)) {
         return <pre>Loading...</pre>;
     }
 
@@ -64,6 +59,7 @@ const Charts = () => {
         .domain([0, d3.max(dataAll, d => d.tripdurationS)])
         .range([0, innerWidth])
         .nice();
+
     const yScaleScatter = d3.scaleLinear()
         .domain([0, d3.max(dataAll, d => d.tripdurationE)])
         .range([innerHeightScatter, 0])
@@ -79,7 +75,7 @@ const Charts = () => {
         .range([innerHeightBar, 0]);
 
     const changeHandler = (event) => {
-        setMonth(event.target.value);
+        setMonth(parseInt(event.target.value, 10));
     };
 
     return (
