@@ -73,7 +73,7 @@ const Charts = ({ dataAll }) => {
         .nice();
 
     const xScaleBar = d3.scaleBand()
-        .domain(data.map(d => d.station).reverse())
+        .domain(data.length > 0 ? data.map(d => d.station).reverse() : [])
         .range([0, innerWidth])
         .padding(0.0);
 

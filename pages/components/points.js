@@ -1,4 +1,4 @@
-function Points({ data, xScale, yScale, selectedStation, onStationHover, onStationLeave }) {
+function Points({ data = [], xScale, yScale, selectedStation, onStationHover, onStationLeave }) {
     const getColor = (station) => (station === selectedStation ? 'red' : 'steelblue');
     const getRadius = (station) => (station === selectedStation ? 10 : 5);
     const getStrokewidth = (station) => (station === selectedStation ? 3 : 1);
@@ -28,7 +28,7 @@ function Points({ data, xScale, yScale, selectedStation, onStationHover, onStati
                         fill={getColor(d.station)}
                         stroke="black"
                         strokeWidth={getStrokewidth(d.station)}
-                        onMouseEnter={() => onStationHover(d, event)}
+                        onMouseEnter={(event) => onStationHover(d, event)}
                         onMouseOut={onStationLeave}
                     />
                 )
