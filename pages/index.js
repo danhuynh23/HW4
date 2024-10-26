@@ -9,15 +9,21 @@ import Tooltip from './components/tooltips';
 const csvUrl = 'https://gist.githubusercontent.com/hogwild/3b9aa737bde61dcb4dfa60cde8046e04/raw/citibike2020.csv';
 
 export async function getServerSideProps() {
-    const dataAll = await d3.csv(csvUrl).then(data => 
-        data.map(d => ({
-            ...d,
-            start: +d.start,
-            tripdurationS: +d.tripdurationS,
-            end: +d.end,
-            tripdurationE: +d.tripdurationE,
-        }))
-    );
+    // Try fetching data with a fallback to an empty array if it fails
+    let dataAll = [];
+    try {
+        dataAll = await d3.csv(csvUrl).then(data => 
+            data.map(d => ({
+                ...d,
+                start: +d.start,
+                tripdurationS: +d.tripdurationS,
+                end: +d.end,
+                tripdurationE: +d.tripdurationE,
+            }))
+        );
+    } catch (error) {
+        console.error("Data fetch error:", error);
+    }
     return { props: { dataAll } };
 }
 
@@ -42,8 +48,9 @@ const Charts = ({ dataAll }) => {
         setTooltipContent(null);
     };
 
-    if (!dataAll || !Array.isArray(dataAll)) {
-        return <pre>Loading...</pre>;
+    // Safeguard for undefined or empty data
+    if (!dataAll || dataAll.length === 0) {
+        return <pre>No data available or failed to load.</pre>;
     }
 
     const WIDTH = 600;
@@ -56,12 +63,12 @@ const Charts = ({ dataAll }) => {
     const data = dataAll.filter(d => d.month === MONTH[month]);
 
     const xScaleScatter = d3.scaleLinear()
-        .domain([0, d3.max(dataAll, d => d.tripdurationS)])
+        .domain([0, d3.max(dataAll, d => d.tripdurationS) || 0])
         .range([0, innerWidth])
         .nice();
 
     const yScaleScatter = d3.scaleLinear()
-        .domain([0, d3.max(dataAll, d => d.tripdurationE)])
+        .domain([0, d3.max(dataAll, d => d.tripdurationE) || 0])
         .range([innerHeightScatter, 0])
         .nice();
 
